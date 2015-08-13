@@ -11,7 +11,15 @@ public class Accounts {
 	private int account;
 	private String accountName;
 	private double accountBalance;
+	private static int nextAcountNumber;
 	
+	public static int getNextAcountNumber() {
+		return nextAcountNumber;
+	}
+	public static void setNextAcountNumber(int nextAcountNumber) {
+		Accounts.nextAcountNumber = nextAcountNumber;
+	}
+
 	private static ArrayList <Accounts> accountslist = new ArrayList <Accounts>(); 
 	private static ArrayList <Transaction> transactionslist = new ArrayList <Transaction>(); 
 	public ArrayList<Accounts> getAccountslist() {

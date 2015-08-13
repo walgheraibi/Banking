@@ -16,8 +16,8 @@ public class Banking {
 		// variables decelerations
 		Scanner keyboard = new Scanner(System.in);
 		String choice = "", tranchoice = "";
-		boolean choiceToclose = false;
-		int accountNo = 0;
+		boolean choiceToclose = false, choiceanotheracc = true;
+		int accountNo = 0, nextaccountNo=0;
 		Accounts acc = new Accounts();
 		HashMap<Integer, String> accountsHash = new HashMap<Integer, String>();
 		HashMap<Integer, String> transactionsHash = new HashMap<Integer, String>();
@@ -42,22 +42,30 @@ public class Banking {
 			preStatement = conn.prepareStatement(sql);
 			result = preStatement.executeQuery();
 
-		while (result.next())
-			{
-				accountsHash.put(Integer.parseInt(result.getString("ACCOUNTNUMBER")),result.getString("ACCOUNTNAME") +" " +result.getString("STARTINGBALENCE"));
+
+			while (result.next()) {
+				accountsHash.put(
+						Integer.parseInt(result.getString("ACCOUNTNUMBER")),
+						result.getString("ACCOUNTNAME") + " "
+								+ result.getString("STARTINGBALENCE"));
+
 				System.out.printf("%s\t%s\t%s\n",
 						result.getString("ACCOUNTNUMBER"),
 						result.getString("ACCOUNTNAME"),
 						result.getString("STARTINGBALENCE"));
+				if(nextaccountNo < Integer.parseInt(result.getString("ACCOUNTNUMBER")))
+					nextaccountNo = Integer.parseInt(result.getString("ACCOUNTNUMBER"));
 			}
-			while (!choice.equals("-1"))
-			{
+
+			while (!choice.equals("-1")) {
+
 				choiceToclose = Validator.getBoolean(keyboard,
 						"Do you want to close an existing account? (y/n) : ");
-				int account = Validator
-						.getInt(keyboard,
-								"Enter an account # or -1 to stop entering accounts : ");
 				if (choiceToclose) {
+					
+					int account = Validator
+							.getInt(keyboard,
+									"Enter an account # or -1 to stop entering accounts : ");
 					if (account != -1) {
 
 						if (accountsHash.containsKey(account)) {
@@ -68,18 +76,13 @@ public class Banking {
 							if (balance == 0) {
 								accountsHash.remove(account,
 										accountsHash.get(account));
-								
-								/// add delete the account here
-							/*	System.out.println("Account " + account
-										+ " was closed");
-								for (Integer key : accountsHash.keySet()) {
-									System.out
-											.println("The balance for account "
-													+ key + " is "
-													+ accountsHash.get(key));
-									// writeHashMap(accountsHash, filename);
-								}
-								*/
+
+								// / add delete the account here
+								sql = "DELETE from accounts WHERE ACCOUNTNUMBER =" +account;
+								preStatement = conn.prepareStatement(sql);
+								result = preStatement.executeQuery();
+								System.out.println("Account " + account +
+										  " was closed");
 							} else
 								System.out
 										.println("Cannot delete this accout beacause it has $"
@@ -91,34 +94,37 @@ public class Banking {
 						break;
 					}
 				} else {
-					if (account != -1) {
-						if (accountsHash.containsKey(account)) {
-							System.out.println("This account is alrady exist!");
-							break;
-						} else {
-							String accountName = Validator.getString(keyboard,
-									"Enter the name for acct # " + account
-											+ " : ");
-							double accountBalance = Validator.getDouble(
-									keyboard, "Enter the balance for acct #  "
-											+ account + " : ", 0,
-									Double.MAX_VALUE);
-							acc.addAcount(account, accountName, accountBalance);
-							accountsHash.put(
-									acc.getAccount(),
-									"	" + acc.getAccountName() + " "
-											+ acc.getAccountBalance());
-						//	sql = "insert into accounts (accountNumber,accountName,accountType,startingBalence)values('"+acc.getAccount()+"',' "+acc.getAccountName()+"','Checking','"+acc.getAccountBalance()+",)";
-					/*		
-							sql = "insert into accounts (accountNumber,accountName,accountType,startingBalence)values('99','Weaam','Checking',900)";
-							
-							preStatement = conn.prepareStatement(sql);
-							result = preStatement.executeQuery();
-							*/
-							acc = new Accounts();
-						}
-					} else
-						choice = "-1";
+
+					while (choiceanotheracc) {
+						Accounts.setNextAcountNumber(++nextaccountNo);
+						int account = Accounts.getNextAcountNumber();
+						
+						String accountName = Validator.getString(keyboard,
+								"Enter the name for acct # " + account + " : ");
+						double accountBalance = Validator.getDouble(keyboard,
+								"Enter the balance for acct #  " + account
+										+ " : ", 0, Double.MAX_VALUE);
+						acc.addAcount(account, accountName, accountBalance);
+						accountsHash.put(
+								acc.getAccount(),
+								"	" + acc.getAccountName() + " "
+										+ acc.getAccountBalance());
+						sql = "insert into accounts (accountNumber,accountName,accountType,startingBalence)values('"
+								+ acc.getAccount()
+								+ "',' "
+								+ acc.getAccountName()
+								+ "','Checking','"
+								+ acc.getAccountBalance() + "')";
+
+						preStatement = conn.prepareStatement(sql);
+						result = preStatement.executeQuery();
+						Accounts.setNextAcountNumber(++account);
+						acc = new Accounts();
+						choiceanotheracc = Validator.getBoolean(keyboard,
+								"Add another account? (y/n) : ");
+					} 
+					choice = "-1";
+
 				}
 
 			}
