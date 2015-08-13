@@ -12,11 +12,10 @@ import java.util.Scanner;
 public class Banking {
 
 	public static void main(String[] args) {
-		System.out.println("-----------------");
 		// variables decelerations
 		Scanner keyboard = new Scanner(System.in);
 		String choice = "", tranchoice = "";
-		boolean choiceToclose = false, choiceanotheracc = true, choiceToclose2=false;
+		boolean choiceToclose = false, choiceanotheracc = true, choiceToclose2 = true;
 		int accountNo = 0, nextaccountNo = 0;
 		Accounts acc = new Accounts();
 		Transaction tran = new Transaction();
@@ -44,7 +43,7 @@ public class Banking {
 			result = preStatement.executeQuery();
 
 			while (result.next()) {
-				
+
 				accountsHash.put(
 						Integer.parseInt(result.getString("ACCOUNTNUMBER")),
 						result.getString("ACCOUNTNAME") + " "
@@ -54,27 +53,30 @@ public class Banking {
 						result.getString("ACCOUNTNUMBER"),
 						result.getString("ACCOUNTNAME"),
 						result.getString("STARTINGBALENCE"));
-				
+
 				if (nextaccountNo < Integer.parseInt(result
 						.getString("ACCOUNTNUMBER")))
 					nextaccountNo = Integer.parseInt(result
 							.getString("ACCOUNTNUMBER"));
-			
+
 			}
 
 			while (!choice.equals("-1")) {
 
 				choiceToclose = Validator.getBoolean(keyboard,
 						"Is it an existing account? (y/n) : ");
-	
-					if (choiceToclose) {
-					int account = Validator
-							.getInt(keyboard,
-									"Enter an account # or -1 to stop entering accounts : ");
-					if (account != -1) {
 
-						if (accountsHash.containsKey(account)) {
-							
+				if (choiceToclose) {
+					choiceToclose = Validator.getBoolean(keyboard,
+							"Do you want to delete an account? (y/n) : ");
+					if (choiceToclose) {
+						int account = Validator
+								.getInt(keyboard,
+										"Enter an account # or -1 to stop entering accounts : ");
+						if (account != -1) {
+
+							if (accountsHash.containsKey(account)) {
+
 								String[] Key_value_pair = accountsHash.get(
 										account).split(" ");
 								double balance = Double
@@ -94,31 +96,36 @@ public class Banking {
 									System.out
 											.println("Cannot delete this accout beacause it has $"
 													+ balance);
-							} 
-						 else
-							System.out.println("This account does not exist!");
+							}
+
+							else
+								System.out
+										.println("This account does not exist!");
+						} else {
+							choice = "-1";
+							break;
+						}
 					} else {
-						choice = "-1";
 						break;
 					}
-					}
-				 else {
 
-								
-				choiceToclose2 = Validator.getBoolean(keyboard,
-												"Do you want to add new account? (y/n) : ");
-					if(choiceToclose2)
-					{
-						while (choiceanotheracc) {
-							
+				
+
+				}
+				
+				else if (choiceToclose2) {
+					while (choiceanotheracc) {
+
 						Accounts.setNextAcountNumber(++nextaccountNo);
 						int account = Accounts.getNextAcountNumber();
 
 						String accountName = Validator.getString(keyboard,
-								"Enter the name for acct # " + account + " : ");
-						double accountBalance = Validator.getDouble(keyboard,
-								"Enter the balance for acct #  " + account
-										+ " : ", 0, Double.MAX_VALUE);
+								"Enter the name for acct ## " + account
+										+ " : ");
+						double accountBalance = Validator.getDouble(
+								keyboard, "Enter the balance for acct #  "
+										+ account + " : ", 0,
+								Double.MAX_VALUE);
 						acc.addAcount(account, accountName, accountBalance);
 						accountsHash.put(
 								acc.getAccount(),
@@ -139,103 +146,102 @@ public class Banking {
 								"Add another account? (y/n) : ");
 					}
 					choice = "-1";
-					}
-					else
-						break;
-
-				}
+				} else
+					break;
 
 			}
-
-		
-		System.out.println();
-		// transactionsHash = readLines(new File(filename2), transactionsHash);
-
-		while (!tranchoice.equals("-1")) {
-
-			String transaction = Validator
-					.getString(
-							keyboard,
-							"Enter a transaction type (Check (C), Debit card (DC), Deposit(D) or Withdrawal(W)) or -1 to finish : ");
-
-			if (!transaction.equals("-1")) {
-
-				accountNo = Validator
-						.getInt(keyboard, "Enter the account # : ");
-				if (accountsHash.containsKey(accountNo)) {
-					acc.setAccount(accountNo);
-					tran.setTransactionType(transaction);
-					
-					double amount = Validator.getDouble(keyboard,
-							"Enter the amount of the " + accountNo + " : ", 0,
-							Double.MAX_VALUE);
-					tran.setAmount(amount);
-					String tranDateStr = Validator.getString(keyboard,
-							"Enter the date of the check: (MM/dd/yyyy) ");
-					GregorianCalendar gregorianCalendar = new GregorianCalendar(
-							Integer.parseInt(tranDateStr.substring(6)),
-							Integer.parseInt(tranDateStr.substring(0, 2)) - 1,
-							Integer.parseInt(tranDateStr.substring(3, 5)));
-					tran.setTranDate(gregorianCalendar);;
-					transaction = acc.addTran(transaction, accountNo, amount,
-							gregorianCalendar);
-					transactionsHash.put(accountNo,
-							"	" + transaction + " " + amount + "	"
-									+ gregorianCalendar.toZonedDateTime());
-					String[] Key_value_pair = accountsHash.get(accountNo)
-							.split(" ");
-					acc.setAccountName(Key_value_pair[Key_value_pair.length - 2]);
-					acc.setAccountBalance(Double
-							.parseDouble(Key_value_pair[Key_value_pair.length - 1]));
-					acc.updateBalance(transaction, amount);
-					accountsHash.replace(accountNo, " " + Key_value_pair[0]
-							+ " " + acc.getAccountBalance());
-					
-					sql = "insert into TRANSACTION (ACCT,TRANSACTIONDATE,AMOUNT,TRANSACTIONTYPE)values('"
-							+ acc.getAccount()
-							+ "',' "
-							+ tran.getTranDate()
-							+ "','"
-							+tran.getAmount()
-							+ tran.getTransactionType() + "')";
-					
-					preStatement = conn.prepareStatement(sql);
-					result = preStatement.executeQuery();
-					
-				} else {
-					System.out
-							.print("The account number does not exist make sure you entered the right number");
-				}
-			} else
-				tranchoice = "-1";
 
 			System.out.println();
-			
-			sql = "select * from TRANSACTION";
-			preStatement = conn.prepareStatement(sql);
-			result = preStatement.executeQuery();
+			// transactionsHash = readLines(new File(filename2),
+			// transactionsHash);
 
-			while (result.next()) {
-				System.out.printf("%s\t%s\t%s\n",
-						result.getString("TRANSACTIONID"),
-						result.getString("ACCT"),
-						result.getString("AMOUNT"),
-						result.getString("TRANSACTIONDATE"));
-				
-			}
-			
-			/*for (Integer key : accountsHash.keySet()) {
-				if (acc.runTransactions((int) key)) {
-					System.out.println("The balance for account " + key
-							+ " for " + acc.getAccountName() + " is "
-							+ acc.getAccountBalance());
-				} else {
-					System.out.println("The balance for account " + key
-							+ " is " + accountsHash.get(key));
+			while (!tranchoice.equals("-1")) {
+
+				String transaction = Validator
+						.getString(
+								keyboard,
+								"Enter a transaction type (Check (C), Debit card (DC), Deposit(D) or Withdrawal(W)) or -1 to finish : ");
+
+				if (!transaction.equals("-1")) {
+
+					accountNo = Validator.getInt(keyboard,
+							"Enter the account # : ");
+					if (accountsHash.containsKey(accountNo)) {
+						acc.setAccount(accountNo);
+						tran.setTransactionType(transaction);
+
+						double amount = Validator.getDouble(keyboard,
+								"Enter the amount of the " + accountNo + " : ",
+								0, Double.MAX_VALUE);
+						tran.setAmount(amount);
+						String tranDateStr = Validator.getString(keyboard,
+								"Enter the date of the check: (MM/dd/yyyy) ");
+						GregorianCalendar gregorianCalendar = new GregorianCalendar(
+								Integer.parseInt(tranDateStr.substring(6)),
+								Integer.parseInt(tranDateStr.substring(0, 2)) - 1,
+								Integer.parseInt(tranDateStr.substring(3, 5)));
+						tran.setTranDate(gregorianCalendar);
+						;
+						transaction = ""
+								+ acc.addTran(transaction, accountNo, amount,
+										gregorianCalendar);
+						transactionsHash.put(accountNo,
+								"	" + transaction + " " + amount + "	"
+										+ gregorianCalendar.toZonedDateTime());
+						String[] Key_value_pair = accountsHash.get(accountNo)
+								.split(" ");
+						acc.setAccountName(Key_value_pair[Key_value_pair.length - 2]);
+						acc.setAccountBalance(Double
+								.parseDouble(Key_value_pair[Key_value_pair.length - 1]));
+						acc.updateBalance(tran.getTransactionType(), amount);
+						accountsHash.replace(accountNo, " " + Key_value_pair[0]
+								+ " " + acc.getAccountBalance());
+					
+						///HERE
+						sql = "insert into TRANSACTION (TRANSACTIONID, ACCT, AMOUNT,TRANSACTIONTYPE)values('6', '98', 100, 1)";
+							
+								/*+ acc.getAccount()
+								+ "',' "
+								+ tran.getAmount()
+								+ "','"
+								+ tran.getTransactionType() + "')";
+*/
+						preStatement = conn.prepareStatement(sql);
+						result = preStatement.executeQuery();
+
+					} else {
+						System.out
+								.print("The account number does not exist make sure you entered the right number");
+					}
+				} else
+					tranchoice = "-1";
+
+				System.out.println();
+
+				sql = "select * from TRANSACTION";
+				preStatement = conn.prepareStatement(sql);
+				result = preStatement.executeQuery();
+
+				while (result.next()) {
+					System.out.printf("%s\t%s\t%s\n",
+							result.getString("TRANSACTIONID"),
+							result.getString("ACCT"),
+							result.getString("AMOUNT"),
+							result.getString("TRANSACTIONDATE"));
+
 				}
 
-			}*/
-		}
+				/*
+				 * for (Integer key : accountsHash.keySet()) { if
+				 * (acc.runTransactions((int) key)) {
+				 * System.out.println("The balance for account " + key + " for "
+				 * + acc.getAccountName() + " is " + acc.getAccountBalance()); }
+				 * else { System.out.println("The balance for account " + key +
+				 * " is " + accountsHash.get(key)); }
+				 * 
+				 * }
+				 */
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
