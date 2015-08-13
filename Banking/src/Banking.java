@@ -42,11 +42,13 @@ public class Banking {
 			preStatement = conn.prepareStatement(sql);
 			result = preStatement.executeQuery();
 
+
 			while (result.next()) {
 				accountsHash.put(
 						Integer.parseInt(result.getString("ACCOUNTNUMBER")),
 						result.getString("ACCOUNTNAME") + " "
 								+ result.getString("STARTINGBALENCE"));
+
 				System.out.printf("%s\t%s\t%s\n",
 						result.getString("ACCOUNTNUMBER"),
 						result.getString("ACCOUNTNAME"),
@@ -56,6 +58,7 @@ public class Banking {
 			}
 
 			while (!choice.equals("-1")) {
+
 				choiceToclose = Validator.getBoolean(keyboard,
 						"Do you want to close an existing account? (y/n) : ");
 				if (choiceToclose) {
@@ -91,6 +94,7 @@ public class Banking {
 						break;
 					}
 				} else {
+
 					while (choiceanotheracc) {
 						Accounts.setNextAcountNumber(++nextaccountNo);
 						int account = Accounts.getNextAcountNumber();
@@ -120,6 +124,7 @@ public class Banking {
 								"Add another account? (y/n) : ");
 					} 
 					choice = "-1";
+
 				}
 
 			}
