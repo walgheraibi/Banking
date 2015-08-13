@@ -3,21 +3,21 @@ import java.util.GregorianCalendar;
 
 public class Transaction {
 
-	private String transactionType;
+	private int transactionType;
 	private double amount;
 	private GregorianCalendar tranDate;
 	
-	public String getTransactionType() {
+	public int getTransactionType() {
 		return transactionType;
 	}
 	public void setTransactionType(String transactionType) {
 		
 		switch(transactionType.toLowerCase())
 		{
-		case "c": this.transactionType ="check"; break;
-		case "d": this.transactionType ="deposit"; break;
-		case "w": this.transactionType ="withdrawal"; break;
-		case "dc": this.transactionType ="debit card"; break;
+		case "c": this.transactionType =2; break;
+		case "d": this.transactionType =1; break;
+		case "w": this.transactionType =3; break;
+		case "dc": this.transactionType =4; break;
 		}
 	}
 	
@@ -38,7 +38,7 @@ public class Transaction {
 	public Transaction()
 	{
 		this.tranDate = new GregorianCalendar();
-		this.transactionType = "check";
+		this.transactionType = 0;
 		this.amount = 0;
 	}
 }
