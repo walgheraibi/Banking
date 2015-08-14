@@ -20,6 +20,7 @@ public class Banking {
 		String choice = "", tranchoice = "";
 		boolean choiceToclose = false, choiceanotheracc = true, choiceToclose2 = true;
 		int accountNo = 0, nextaccountNo = 0;
+		int sum = 0;
 		Accounts acc = new Accounts();
 		Transaction tran = new Transaction();
 		HashMap<Integer, String> accountsHash = new HashMap<Integer, String>();
@@ -51,12 +52,14 @@ public class Banking {
 						Integer.parseInt(result.getString("Acct")),
 						result.getString("Name1") + " "
 								+ result.getString("birthday")+ " " +
+								+ result.getInt("SAVINGS")+ " " +
 								Integer.parseInt(result.getString("StartingBalance"))
 								);
 
-				System.out.printf("%s\t%s\t%s\t%s\n",
+				System.out.printf("%s\t%s\t%s\t%s\t%s\n",
 						result.getString("Acct"),
 						result.getString("Name1"),
+						result.getInt("SAVINGS"),
 						result.getDate("birthday"),
 						result.getString("StartingBalance"));
 		
@@ -128,7 +131,8 @@ public class Banking {
 											String[] Key_value_pair = accountsHash.get(
 													account).split(" ");
 											double balance1 = Double
-													.parseDouble(Key_value_pair[Key_value_pair.length - 1]);	
+													.parseDouble(Key_value_pair[Key_value_pair.length - 1]);
+											
 											String[] Key_value_pair2 = accountsHash.get(
 													account2).split(" ");
 											double balance2 = Double
@@ -187,24 +191,67 @@ public class Banking {
 						String dob = Validator.getString(keyboard,
 								"Enter the date of birth: (MM/dd/yyyy) ");
 						int accounttype = Validator.getInt(
-								keyboard, "Enter (1 for Saving and 0 for checking) :"
-										+ account + " : ", 0,
-								Integer.MAX_VALUE);
+								keyboard, "Enter (1 for Saving and 0 for checking) :");
 						acc.addAcount(account, accountName, accountBalance);
 						accountsHash.put(
 								acc.getAccount(),
-								"	" + acc.getAccountName() + " "
-										+ acc.getAccountBalance());
-						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance,BIRTHDAY, SAVINGS)values("
-								+ acc.getAccount()
-								+ ",'"
-								+ acc.getAccountName()
-								+"', " +acc.getAccountBalance() + 
-								", to_date('"+dob+"','mm/dd/yyyy'),"+
-								accounttype +")";
+								"	" + acc.getAccountName() + " " +
+								"	" + accounttype + " "
+								+ acc.getAccountBalance());
+						
+
+						
+						sql = "select SAVINGS from ACCOUNTS where NAME1=' "+ accountName+"' and BIRTHDAY= to_date('"+dob+"','mm/dd/yyyy')";
 
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
+					
+						///***********
+						int i= 0, saving = 2;
+						while(result.next()){
+						saving = result.getInt("SAVINGS");	
+						i++;
+						}
+				
+						if(i >= 2)
+						{
+							System.out.println("You have 2 accounts you cannot add more accounts");
+							break;
+						}
+						
+						else
+						{
+						
+							if(saving == 0)
+							{
+								System.out.println("You have a Checking account (Saving account is created)");	
+								sql = "insert into accounts (Acct, Name1, SAVINGS, StartingBalance,birthday)values('"
+										+ acc.getAccount()
+										+ "',' "
+										+ acc.getAccountName()
+										+ "', 1 ,'"
+										+ acc.getAccountBalance() + "', to_date('"+dob+"','mm/dd/yyyy'))";
+								preStatement = conn.prepareStatement(sql);
+								result = preStatement.executeQuery();
+
+							}
+							else if(saving == 1)
+							{
+								System.out.println("You have a Saving account (Checking account is created)");	
+								sql = "insert into accounts (Acct, Name1, SAVINGS, StartingBalance,birthday)values('"
+										+ acc.getAccount()
+										+ "',' "
+										+ acc.getAccountName()
+										+ "', 0 ,'"
+										+ acc.getAccountBalance() + "', to_date('"+dob+"','mm/dd/yyyy'))";
+								preStatement = conn.prepareStatement(sql);
+								result = preStatement.executeQuery();
+
+							}
+						
+						//*************
+						
+						}
 						Accounts.setNextAcountNumber(++account);
 						acc = new Accounts();
 						choiceanotheracc = Validator.getBoolean(keyboard,
