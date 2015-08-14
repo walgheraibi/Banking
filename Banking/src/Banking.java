@@ -211,7 +211,6 @@ public class Banking {
 								+ ","
 								+ tran.getTransactionType()+ 
 								", to_date('"+tranDateStr+"','mm/dd/yyyy'))";
-System.out.println(""+sql);
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
 
@@ -229,7 +228,7 @@ System.out.println(""+sql);
 				result = preStatement.executeQuery();
 
 				while (result.next()) {
-					System.out.printf("%s\t%s\t%s\t%s\n",
+					System.out.printf("%s\t%s\t%s\t%s\t%s\n",
 							result.getInt("ID"),
 							result.getInt("ACCOUNT"),
 							result.getInt("AMOUNT"),
