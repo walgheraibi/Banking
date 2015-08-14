@@ -75,7 +75,7 @@ public class Accounts {
 		accountslist.add(this);
 	}
 	
-	public String addTran(String tranType, int accountNo, double amount, GregorianCalendar tranDate)
+	public int addTran(String tranType, int accountNo, double amount, GregorianCalendar tranDate)
 	{
 		Transaction tran = new Transaction();
 		tran.setAmount(amount);
@@ -97,14 +97,14 @@ public class Accounts {
 	}
 	
 	
-	public void updateBalance(String tranType, double amount)
+	public void updateBalance(int i, double amount)
 	{
-		switch(tranType)
+		switch(i)
 		{
-		case "check": this.sub(amount); break;
-		case "deposit": this.add(amount); break;
-		case "withdrawal": this.sub(amount); break;
-		case "debit card": this.sub(amount); break;
+		case 2: this.sub(amount); break;
+		case 1: this.add(amount); break;
+		case 3: this.sub(amount); break;
+		case 4: this.sub(amount); break;
 		}
 	}
 	
@@ -134,7 +134,7 @@ public class Accounts {
 			isExist= true;
 		for(Transaction t : transactionslist)
 		{
-			if(t.getTransactionType() !="deposit")
+			if(t.getTransactionType() !=1)
 				t.setAmount(-1*t.getAmount());
 		}
 		transactionHash.replace(account,transactionslist);
