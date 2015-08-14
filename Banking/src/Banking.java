@@ -141,7 +141,8 @@ public class Banking {
 												"Enter the amount of the " + accountNo + " : ",
 												0, Integer.MAX_VALUE);
 										
-										
+										if (amount <= balance1)
+										{
 										sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (balance1-amount) +" WHERE Acct ="+account;
 										preStatement = conn.prepareStatement(sql);
 										result = preStatement.executeQuery();
@@ -151,6 +152,32 @@ public class Banking {
 										result = preStatement.executeQuery();
 										choice = "-1";
 										break;
+										}
+										else
+										{
+											String name = "";
+											int strbalance=0;
+											sql = "select name1 from accounts where acct =" + account;
+											preStatement = conn.prepareStatement(sql);
+											result = preStatement.executeQuery();
+											while(result.next())
+											{
+												name = result.getString("name1");
+											}
+											System.out.println("OVERDRAFT!");
+											sql = "select STARTINGBALANCE from accounts where name1 = '" +name+ "'  and savings = 1";
+											preStatement = conn.prepareStatement(sql);
+											result = preStatement.executeQuery();
+											while(result.next())
+											{
+												strbalance = result.getInt("STARTINGBALANCE");
+											}
+
+											sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (strbalance -15) +" WHERE name1 = '" +name+ "'  and savings = 1";
+											preStatement = conn.prepareStatement(sql);
+											result = preStatement.executeQuery();
+											
+										}
 									}
 												}
 									else
