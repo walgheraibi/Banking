@@ -4,6 +4,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Properties;
@@ -38,26 +39,29 @@ public class Banking {
 		try {
 			Connection conn = DriverManager.getConnection(url, props);
 
-			sql = "select * from accounts";
+			sql = "select * from ACCOUNTS";
 			preStatement = conn.prepareStatement(sql);
 			result = preStatement.executeQuery();
 
 			while (result.next()) {
 
 				accountsHash.put(
-						Integer.parseInt(result.getString("ACCOUNTNUMBER")),
-						result.getString("ACCOUNTNAME") + " "
-								+ result.getString("STARTINGBALENCE"));
+						Integer.parseInt(result.getString("Acct")),
+						result.getString("Name1") + " "
+								+ result.getString("birthday").substring(0, 9)+ " " +
+								Integer.parseInt(result.getString("StartingBalance"))
+								);
 
-				System.out.printf("%s\t%s\t%s\n",
-						result.getString("ACCOUNTNUMBER"),
-						result.getString("ACCOUNTNAME"),
-						result.getString("STARTINGBALENCE"));
-
+				System.out.printf("%s\t%s\t%s\t%s\n",
+						result.getString("Acct"),
+						result.getString("Name1"),
+						result.getString("birthday").substring(0, 9),
+						result.getString("StartingBalance"));
+		
 				if (nextaccountNo < Integer.parseInt(result
-						.getString("ACCOUNTNUMBER")))
+						.getString("Acct")))
 					nextaccountNo = Integer.parseInt(result
-							.getString("ACCOUNTNUMBER"));
+							.getString("Acct"));
 
 			}
 
@@ -86,7 +90,7 @@ public class Banking {
 											accountsHash.get(account));
 
 									// / add delete the account here
-									sql = "DELETE from accounts WHERE ACCOUNTNUMBER ="
+									sql = "DELETE from ACCOUNTS WHERE Acct ="
 											+ account;
 									preStatement = conn.prepareStatement(sql);
 									result = preStatement.executeQuery();
@@ -170,9 +174,9 @@ public class Banking {
 						acc.setAccount(accountNo);
 						tran.setTransactionType(transaction);
 
-						double amount = Validator.getDouble(keyboard,
+						int amount = Validator.getInt(keyboard,
 								"Enter the amount of the " + accountNo + " : ",
-								0, Double.MAX_VALUE);
+								0, Integer.MAX_VALUE);
 						tran.setAmount(amount);
 						String tranDateStr = Validator.getString(keyboard,
 								"Enter the date of the check: (MM/dd/yyyy) ");
@@ -198,14 +202,13 @@ public class Banking {
 								+ " " + acc.getAccountBalance());
 					
 						///HERE
-						sql = "insert into TRANSACTION (TRANSACTIONID, ACCT, AMOUNT,TRANSACTIONTYPE)values('6', '98', 100, 1)";
-							
-								/*+ acc.getAccount()
-								+ "',' "
+						sql = "insert into transactions (account, amount, transaction)values("+
+								acc.getAccount()
+								+ ","
 								+ tran.getAmount()
-								+ "','"
-								+ tran.getTransactionType() + "')";
-*/
+								+ ","
+								+ tran.getTransactionType() + ")";
+System.out.println(""+sql);
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
 
@@ -218,37 +221,26 @@ public class Banking {
 
 				System.out.println();
 
-				sql = "select * from TRANSACTION";
+				sql = "select * from TRANSACTIONs";
 				preStatement = conn.prepareStatement(sql);
 				result = preStatement.executeQuery();
 
 				while (result.next()) {
-					System.out.printf("%s\t%s\t%s\n",
-							result.getString("TRANSACTIONID"),
-							result.getString("ACCT"),
-							result.getString("AMOUNT"),
-							result.getString("TRANSACTIONDATE"));
+					System.out.printf("%s\t%s\t%s\t%s\n",
+							result.getInt("ID"),
+							result.getInt("ACCOUNT"),
+							result.getInt("AMOUNT"),
+							result.getInt("TRANSACTION"),
+							result.getDate("DATE1"));
 
 				}
 
-				/*
-				 * for (Integer key : accountsHash.keySet()) { if
-				 * (acc.runTransactions((int) key)) {
-				 * System.out.println("The balance for account " + key + " for "
-				 * + acc.getAccountName() + " is " + acc.getAccountBalance()); }
-				 * else { System.out.println("The balance for account " + key +
-				 * " is " + accountsHash.get(key)); }
-				 * 
-				 * }
-				 */
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		// writeHashMap(accountsHash, filename);
-		// writeHashMap(transactionsHash, filename2);
 	}
 
 	public static HashMap<Integer, String> readLines(File file,
