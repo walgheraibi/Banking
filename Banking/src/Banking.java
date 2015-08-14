@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
+import oracle.sql.DATE;
+
 public class Banking {
 
 	public static void main(String[] args) {
@@ -126,20 +128,23 @@ public class Banking {
 						String accountName = Validator.getString(keyboard,
 								"Enter the name for acct ## " + account
 										+ " : ");
-						double accountBalance = Validator.getDouble(
+						int accountBalance = Validator.getInt(
 								keyboard, "Enter the balance for acct #  "
 										+ account + " : ", 0,
-								Double.MAX_VALUE);
+								Integer.MAX_VALUE);
+						String dob = Validator.getString(keyboard,
+								"Enter the date of birth: (MM/dd/yyyy) ");
 						acc.addAcount(account, accountName, accountBalance);
 						accountsHash.put(
 								acc.getAccount(),
 								"	" + acc.getAccountName() + " "
 										+ acc.getAccountBalance());
-						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance)values("
+						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance,BIRTHDAY)values("
 								+ acc.getAccount()
-								+ ",' "
+								+ ",'"
 								+ acc.getAccountName()
-								+"', " +acc.getAccountBalance() + ")";
+								+"', " +acc.getAccountBalance() + 
+								", to_date('"+dob+"','mm/dd/yyyy'))";
 
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
@@ -155,8 +160,6 @@ public class Banking {
 			}
 
 			System.out.println();
-			// transactionsHash = readLines(new File(filename2),
-			// transactionsHash);
 
 			while (!tranchoice.equals("-1")) {
 
@@ -201,12 +204,13 @@ public class Banking {
 								+ " " + acc.getAccountBalance());
 					
 						///HERE
-						sql = "insert into transactions (account, amount, transaction)values("+
+						sql = "insert into transactions (account, amount, transaction, date1)values("+
 								acc.getAccount()
 								+ ","
 								+ tran.getAmount()
 								+ ","
-								+ tran.getTransactionType() + ")";
+								+ tran.getTransactionType()+ 
+								", to_date('"+tranDateStr+"','mm/dd/yyyy'))";
 System.out.println(""+sql);
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
