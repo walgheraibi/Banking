@@ -107,19 +107,71 @@ public class Banking {
 							else
 								System.out
 										.println("This account does not exist!");
+						}
 						} else {
+							
+							choiceToclose = Validator.getBoolean(keyboard,
+									"Do you want to transfer money between accounts? (y/n) : ");
+							if (choiceToclose) {
+								int account = Validator
+										.getInt(keyboard,
+												"Enter first account # (transfer from) or -1 to Exit : ");
+								if(account!= -1)
+								{
+									int account2 = Validator
+											.getInt(keyboard,
+													"Enter second account # (transfer to) or -1 to Exit : ");
+									if(account2!= -1)
+									{
+										if (accountsHash.containsKey(account) && accountsHash.containsKey(account2)) {
+
+											String[] Key_value_pair = accountsHash.get(
+													account).split(" ");
+											double balance1 = Double
+													.parseDouble(Key_value_pair[Key_value_pair.length - 1]);	
+											String[] Key_value_pair2 = accountsHash.get(
+													account2).split(" ");
+											double balance2 = Double
+													.parseDouble(Key_value_pair2[Key_value_pair2.length - 1]);	
+										int amount = Validator.getInt(keyboard,
+												"Enter the amount of the " + accountNo + " : ",
+												0, Integer.MAX_VALUE);
+										
+										
+										sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (balance1-amount) +" WHERE Acct ="+account;
+										preStatement = conn.prepareStatement(sql);
+										result = preStatement.executeQuery();
+										
+										sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (balance2 +amount) +" WHERE Acct ="+account2;
+										preStatement = conn.prepareStatement(sql);
+										result = preStatement.executeQuery();
+										choice = "-1";
+										break;
+									}
+												}
+									else
+									{
+										choice = "-1";
+										break;
+									}
+								}
+								else
+								{
+									choice = "-1";
+									break;
+								}
+									
+							}
+							else
+							{
 							choice = "-1";
 							break;
+							}
 						}
-					} else {
-						break;
-					}
-
+					} else 
+				{
+						if (choiceToclose2) {
 				
-
-				}
-				
-				else if (choiceToclose2) {
 					while (choiceanotheracc) {
 
 						Accounts.setNextAcountNumber(++nextaccountNo);
@@ -134,17 +186,22 @@ public class Banking {
 								Integer.MAX_VALUE);
 						String dob = Validator.getString(keyboard,
 								"Enter the date of birth: (MM/dd/yyyy) ");
+						int accounttype = Validator.getInt(
+								keyboard, "Enter (1 for Saving and 0 for checking) :"
+										+ account + " : ", 0,
+								Integer.MAX_VALUE);
 						acc.addAcount(account, accountName, accountBalance);
 						accountsHash.put(
 								acc.getAccount(),
 								"	" + acc.getAccountName() + " "
 										+ acc.getAccountBalance());
-						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance,BIRTHDAY)values("
+						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance,BIRTHDAY, SAVINGS)values("
 								+ acc.getAccount()
 								+ ",'"
 								+ acc.getAccountName()
 								+"', " +acc.getAccountBalance() + 
-								", to_date('"+dob+"','mm/dd/yyyy'))";
+								", to_date('"+dob+"','mm/dd/yyyy'),"+
+								accounttype +")";
 
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
@@ -236,9 +293,10 @@ public class Banking {
 							result.getDate("DATE1"));
 
 				}
-
 			}
-		} catch (SQLException e) {
+
+		} 
+		}catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
