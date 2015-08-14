@@ -48,14 +48,14 @@ public class Banking {
 				accountsHash.put(
 						Integer.parseInt(result.getString("Acct")),
 						result.getString("Name1") + " "
-								+ result.getString("birthday").substring(0, 9)+ " " +
+								+ result.getString("birthday")+ " " +
 								Integer.parseInt(result.getString("StartingBalance"))
 								);
 
 				System.out.printf("%s\t%s\t%s\t%s\n",
 						result.getString("Acct"),
 						result.getString("Name1"),
-						result.getString("birthday").substring(0, 9),
+						result.getDate("birthday"),
 						result.getString("StartingBalance"));
 		
 				if (nextaccountNo < Integer.parseInt(result
@@ -135,12 +135,11 @@ public class Banking {
 								acc.getAccount(),
 								"	" + acc.getAccountName() + " "
 										+ acc.getAccountBalance());
-						sql = "insert into accounts (accountNumber,accountName,accountType,startingBalence)values('"
+						sql = "insert into ACCOUNTS (Acct,Name1,StartingBalance)values("
 								+ acc.getAccount()
-								+ "',' "
+								+ ",' "
 								+ acc.getAccountName()
-								+ "','Checking','"
-								+ acc.getAccountBalance() + "')";
+								+"', " +acc.getAccountBalance() + ")";
 
 						preStatement = conn.prepareStatement(sql);
 						result = preStatement.executeQuery();
