@@ -21,12 +21,12 @@ public class Banking {
 		boolean choiceToclose = false, choiceanotheracc = true, choiceToclose2 = true;
 		int accountNo = 0, nextaccountNo = 0;
 		int sum = 0;
-		Accounts acc = new Accounts();
-		Transaction tran = new Transaction();
+	Transaction tran = new Transaction();
+	Accounts acc = new Accounts();
 		HashMap<Integer, String> accountsHash = new HashMap<Integer, String>();
 		HashMap<Integer, String> transactionsHash = new HashMap<Integer, String>();
 		String sql = "";
-		PreparedStatement preStatement = null;
+	//	PreparedStatement preStatement = null;
 		ResultSet result = null;
 		System.out.println("Welcome to Evil Corp Saving and Loan");
 		System.out.println();
@@ -43,8 +43,7 @@ public class Banking {
 			Connection conn = DriverManager.getConnection(url, props);
 
 			sql = "select * from ACCOUNTS";
-			preStatement = conn.prepareStatement(sql);
-			result = preStatement.executeQuery();
+			result = sqlConnection(conn,sql );
 
 			while (result.next()) {
 
@@ -56,7 +55,7 @@ public class Banking {
 								Integer.parseInt(result.getString("StartingBalance"))
 								);
 
-				System.out.printf("%s\t%s\t%s\t%s\t%s\n",
+				System.out.printf("%s\t%20s\t%s\t%10s\t%s\n",
 						result.getString("Acct"),
 						result.getString("Name1"),
 						result.getInt("SAVINGS"),
@@ -97,8 +96,7 @@ public class Banking {
 									// / add delete the account here
 									sql = "DELETE from ACCOUNTS WHERE Acct ="
 											+ account;
-									preStatement = conn.prepareStatement(sql);
-									result = preStatement.executeQuery();
+									result = sqlConnection(conn,sql );
 									System.out.println("Account " + account
 											+ " was closed");
 								} else
@@ -144,12 +142,10 @@ public class Banking {
 										if (amount <= balance1)
 										{
 										sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (balance1-amount) +" WHERE Acct ="+account;
-										preStatement = conn.prepareStatement(sql);
-										result = preStatement.executeQuery();
+										result = sqlConnection(conn,sql );
 										
 										sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (balance2 +amount) +" WHERE Acct ="+account2;
-										preStatement = conn.prepareStatement(sql);
-										result = preStatement.executeQuery();
+										result = sqlConnection(conn,sql );
 										choice = "-1";
 										break;
 										}
@@ -158,24 +154,21 @@ public class Banking {
 											String name = "";
 											int strbalance=0;
 											sql = "select name1 from accounts where acct =" + account;
-											preStatement = conn.prepareStatement(sql);
-											result = preStatement.executeQuery();
+											result = sqlConnection(conn,sql );
 											while(result.next())
 											{
 												name = result.getString("name1");
 											}
 											System.out.println("OVERDRAFT!");
 											sql = "select STARTINGBALANCE from accounts where name1 = '" +name+ "'  and savings = 1";
-											preStatement = conn.prepareStatement(sql);
-											result = preStatement.executeQuery();
+											result = sqlConnection(conn,sql );
 											while(result.next())
 											{
 												strbalance = result.getInt("STARTINGBALANCE");
 											}
 
 											sql = "UPDATE ACCOUNTS SET StartingBalance = "+  (int) (strbalance -15) +" WHERE name1 = '" +name+ "'  and savings = 1";
-											preStatement = conn.prepareStatement(sql);
-											result = preStatement.executeQuery();
+											result = sqlConnection(conn,sql );
 											
 										}
 									}
@@ -219,19 +212,18 @@ public class Banking {
 								"Enter the date of birth: (MM/dd/yyyy) ");
 						int accounttype = Validator.getInt(
 								keyboard, "Enter (1 for Saving and 0 for checking) :");
-						acc.addAcount(account, accountName, accountBalance);
+					
 						accountsHash.put(
-								acc.getAccount(),
-								"	" + acc.getAccountName() + " " +
+								account,
+								"	" + accountName + " " +
 								"	" + accounttype + " "
-								+ acc.getAccountBalance());
+								+accountBalance);
 						
 
 						
 						sql = "select SAVINGS from ACCOUNTS where NAME1=' "+ accountName+"' and BIRTHDAY= to_date('"+dob+"','mm/dd/yyyy')";
 
-						preStatement = conn.prepareStatement(sql);
-						result = preStatement.executeQuery();
+						result = sqlConnection(conn,sql );
 					
 						///***********
 						int i= 0, saving = 2;
@@ -253,26 +245,24 @@ public class Banking {
 							{
 								System.out.println("You have a Checking account (Saving account is created)");	
 								sql = "insert into accounts (Acct, Name1, SAVINGS, StartingBalance,birthday)values('"
-										+ acc.getAccount()
+										+account
 										+ "',' "
-										+ acc.getAccountName()
+										+ accountName
 										+ "', 1 ,'"
-										+ acc.getAccountBalance() + "', to_date('"+dob+"','mm/dd/yyyy'))";
-								preStatement = conn.prepareStatement(sql);
-								result = preStatement.executeQuery();
+										+ accountBalance+ "', to_date('"+dob+"','mm/dd/yyyy'))";
+								result = sqlConnection(conn,sql );
 
 							}
 							else if(saving == 1)
 							{
 								System.out.println("You have a Saving account (Checking account is created)");	
 								sql = "insert into accounts (Acct, Name1, SAVINGS, StartingBalance,birthday)values('"
-										+ acc.getAccount()
+										+ account
 										+ "',' "
-										+ acc.getAccountName()
+										+ accountName
 										+ "', 0 ,'"
-										+ acc.getAccountBalance() + "', to_date('"+dob+"','mm/dd/yyyy'))";
-								preStatement = conn.prepareStatement(sql);
-								result = preStatement.executeQuery();
+										+accountBalance + "', to_date('"+dob+"','mm/dd/yyyy'))";
+								result = sqlConnection(conn,sql );
 
 							}
 						
@@ -280,7 +270,6 @@ public class Banking {
 						
 						}
 						Accounts.setNextAcountNumber(++account);
-						acc = new Accounts();
 						choiceanotheracc = Validator.getBoolean(keyboard,
 								"Add another account? (y/n) : ");
 					}
@@ -304,7 +293,7 @@ public class Banking {
 					accountNo = Validator.getInt(keyboard,
 							"Enter the account # : ");
 					if (accountsHash.containsKey(accountNo)) {
-						acc.setAccount(accountNo);
+				
 						tran.setTransactionType(transaction);
 
 						int amount = Validator.getInt(keyboard,
@@ -319,9 +308,7 @@ public class Banking {
 								Integer.parseInt(tranDateStr.substring(3, 5)));
 						tran.setTranDate(gregorianCalendar);
 						;
-						transaction = ""
-								+ acc.addTran(transaction, accountNo, amount,
-										gregorianCalendar);
+						transaction = ""+tran.getTransactionType();
 						transactionsHash.put(accountNo,
 								"	" + transaction + " " + amount + "	"
 										+ gregorianCalendar.toZonedDateTime());
@@ -342,8 +329,7 @@ public class Banking {
 								+ ","
 								+ tran.getTransactionType()+ 
 								", to_date('"+tranDateStr+"','mm/dd/yyyy'))";
-						preStatement = conn.prepareStatement(sql);
-						result = preStatement.executeQuery();
+						result = sqlConnection(conn,sql );
 
 					} else {
 						System.out
@@ -355,8 +341,7 @@ public class Banking {
 				System.out.println();
 
 				sql = "select * from TRANSACTIONs";
-				preStatement = conn.prepareStatement(sql);
-				result = preStatement.executeQuery();
+				result = sqlConnection(conn,sql );
 
 				while (result.next()) {
 					System.out.printf("%s\t%s\t%s\t%s\t%s\n",
@@ -371,48 +356,26 @@ public class Banking {
 
 		} 
 		}catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		
+		
 	}
-
-	public static HashMap<Integer, String> readLines(File file,
-			HashMap<Integer, String> hashmap) {
-		if (!file.exists()) {
-			return hashmap;
-		}
+	
+	public static ResultSet sqlConnection(Connection conn, String sql)
+	{
+		ResultSet result = null;
+		PreparedStatement preStatement = null;
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line = reader.readLine();
-			while (line != null) {
-
-				String[] Key_value_pair = line.split("\t");
-				hashmap.put(Integer.parseInt(Key_value_pair[0]),
-						Key_value_pair[Key_value_pair.length - 1]);
-				line = reader.readLine();
-			}
-			reader.close();
-		} catch (Exception e) {
+			preStatement = conn.prepareStatement(sql);
+			result = preStatement.executeQuery();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return hashmap;
+	
+		return result;
 	}
 
-	public static HashMap<Integer, String> writeHashMap(
-			HashMap<Integer, String> n, String filename) {
-		PrintWriter writer;
-		try {
-			writer = new PrintWriter(new File(filename));
-			for (Integer key : n.keySet())
-				writer.println("" + key + "	" + n.get(key));
-			// you must close the PrintWriter
-			writer.close();
-
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return n;
-	}
 }
